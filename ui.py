@@ -297,11 +297,6 @@ h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
     border-bottom-left-radius: 4px;
 }
 
-.msg-bot-loading {
-    font-style: italic;
-    opacity: 0.8;
-}
-
 .chat-input-wrap {
     padding: 12px 16px;
     border-top: 1px solid rgba(255,255,255,0.06);
@@ -433,53 +428,38 @@ render_card(c3, "card-pnl", "📈", "P&L / Income",      "income_statement")
 
 # ── Chat functionality ─────────────────────────────────────────────────────────
 # Hidden text input to receive messages from JavaScript
-user_message = st.text_input("chat_receiver", value="", key="chat_receiver", label_visibility="collapsed")
+chat_input_key = f"chat_input_{st.session_state.chat_input_counter}"
+user_message = user_message = st.chat_input("Type here...")
 
-# Hide the hidden input field from the page
-st.markdown(
-    """
-    <style>
-    input[aria-label="chat_receiver"] { display: none !important; }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+
+for msg in st.session_state.chat_history:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
 # Process new message
-if user_message and user_message.strip() and not st.session_state.processing:
-    message_text = user_message.strip()
+if user_message and user_message.strip():
+    # Add user message to history
     st.session_state.chat_history.append({
         "role": "user",
-        "content": message_text
+        "content": user_message
     })
-    st.session_state.chat_history.append({
-        "role": "bot-loading",
-        "content": "Loading answer..."
-    })
-    st.session_state.processing = True
-    st.session_state.chat_receiver = ""
-
-    with st.spinner("Thinking through the documents..."):
-        try:
-            bot_response = main.rag_flow(question=message_text)
-            for i in range(len(st.session_state.chat_history) - 1, -1, -1):
-                if st.session_state.chat_history[i]["role"] == "bot-loading":
-                    st.session_state.chat_history[i] = {
-                        "role": "bot",
-                        "content": bot_response
-                    }
-                    break
-        except Exception as e:
-            for i in range(len(st.session_state.chat_history) - 1, -1, -1):
-                if st.session_state.chat_history[i]["role"] == "bot-loading":
-                    st.session_state.chat_history[i] = {
-                        "role": "bot",
-                        "content": f"Error: {str(e)}"
-                    }
-                    break
-        finally:
-            st.session_state.processing = False
-    st.experimental_rerun()
+    
+    # Get bot response from RAG
+    try:
+        bot_response = main.rag_flow(question=user_message)
+        st.session_state.chat_history.append({
+            "role": "bot",
+            "content": bot_response
+        })
+    except Exception as e:
+        st.session_state.chat_history.append({
+            "role": "bot",
+            "content": f"Error: {str(e)}"
+        })
+    
+    # Increment counter to reset input
+    st.session_state.chat_input_counter += 1
+    st.rerun()
 
 # ── Chat overlay + FAB ────────────────────────────────────────────────────────
 def build_messages_html():
@@ -492,12 +472,7 @@ def build_messages_html():
         """
     html = ""
     for msg in st.session_state.chat_history:
-        if msg["role"] == "user":
-            css = "msg-user"
-        elif msg["role"] == "bot-loading":
-            css = "msg-bot msg-bot-loading"
-        else:
-            css = "msg-bot"
+        css = "msg-user" if msg["role"] == "user" else "msg-bot"
         content = msg["content"].replace("\n", "<br>")  # Preserve line breaks
         html += f'<div class="msg {css}">{content}</div>'
     return html
