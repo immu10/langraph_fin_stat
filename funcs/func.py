@@ -11,12 +11,12 @@ vectorstore = None
 def create_doc_split():
     """Creates Vector store for RAG"""
     vector_store,split = vector_store_init()
-    return vector_store
+    return vector_store,split
 
 
 def split_summary():
     """ create summary of each section for site"""
-    vector_store = create_doc_split()
+    vector_store,split = create_doc_split()
 
 
     
