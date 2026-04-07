@@ -6,17 +6,10 @@ from langraph_fin_stat.funcs.func import get_vectorstore
 from prompt import get_rag_prompt
 
 class GraphState(TypedDict):
+    vector_store : Any
     question: str
-    documents: list
     context: str
     answer: str
-
-def create_doc_split(state: GraphState) -> Dict[str, Any]:
-    """Takes document to make vector store for RAG"""
-    
-
-    
-    return {"documents": state["documents"]}
 
 
 
@@ -24,7 +17,7 @@ def create_doc_split(state: GraphState) -> Dict[str, Any]:
 def retrieve_documents_for_question(state: GraphState) -> Dict[str, Any]:
     """Retrieve relevant documents for the question"""
     print("Checking vectorstore...")
-    vectorstore = get_vectorstore()
+    vectorstore = state.get("vector_store", None)
     if vectorstore is None:
         raise ValueError("Vectorstore is not accessible. Please ensure it is created successfully.")
     
