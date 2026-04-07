@@ -277,7 +277,7 @@ if __name__ == "__main__":
     #     print(content[:10000])
 
 def vector_store_init():
-    file_path = r"C:/Users/rusty/OneDrive/Desktop/langraph_fin_stat/langraph_fin_stat/data/Annual_Report_FY25-152-157.pdf"
+    file_path = r"data\Annual_Report_FY25-152-157.pdf"
     results = extract_financial_statements(file_path)
 
     documents = []
