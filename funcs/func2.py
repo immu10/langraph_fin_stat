@@ -237,7 +237,10 @@ def extract_financial_statements(file_path):
         print(sec)
 
     extracted = extract_sections_text(pages, section_ranges)
-    splits = json.dumps(extracted, indent=2)
+
+    json_string = json.dumps(extracted)
+    splits = json.loads(json_string)
+
     # 🔍 Validation scores
     print("\n📊 Validation Scores:")
     for sec, text in extracted.items():
@@ -268,7 +271,7 @@ if __name__ == "__main__":
     file_path = "data\Annual_Report_FY25-152-157.pdf"
 
     results = extract_financial_statements(file_path)
-    print(results)
+    print(type(results))
 
     # for section, content in results.items():
     #     print("\n====================")
