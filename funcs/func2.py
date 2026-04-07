@@ -1,8 +1,251 @@
-def vector_store_init():
-    vector_store = None # Placeholder for vector store initialization logic
-    splits = {
-        "Balance Sheet": "", #Summary of Balance Sheet, 
-        "Income Statement": "", #Summary of Income Statement
-        "Cash Flow Statement": "" #Summary of Cash Flow Statement
-    } # Placeholder for returning the 3 splits need it in a dict for the ui summary part
-    return vector_store, splits
+import pdfplumber
+import pytesseract
+from pdf2image import convert_from_path
+import re
+
+# -------------------------------
+# OCR Decision
+# -------------------------------
+def needs_ocr(text):
+    if text is None:
+        return True
+
+    text = text.strip()
+
+    if len(text) < 20:
+        return True
+
+    valid_chars = sum(c.isalnum() for c in text)
+    total_chars = len(text)
+
+    if total_chars == 0:
+        return True
+
+    quality_ratio = valid_chars / total_chars
+
+    words = text.split()
+    valid_words = [w for w in words if re.match(r'^[a-zA-Z0-9]+$', w)]
+    word_ratio = len(valid_words) / (len(words) + 1e-5)
+
+    if quality_ratio < 0.5 or word_ratio < 0.4:
+        return True
+
+    return False
+
+
+# -------------------------------
+# OCR Extraction
+# -------------------------------
+def ocr_pdf(file_path):
+    images = convert_from_path(file_path)
+    pages = []
+
+    for i, image in enumerate(images):
+        text = pytesseract.image_to_string(image)
+
+        pages.append({
+            "page_num": i,
+            "text": text.lower()
+        })
+
+    return pages
+
+
+# -------------------------------
+# Hybrid Extraction
+# -------------------------------
+def extract_pdf_pages(file_path):
+    pages = []
+    use_ocr = False
+
+    with pdfplumber.open(file_path) as pdf:
+        for i, page in enumerate(pdf.pages):
+            text = page.extract_text()
+
+            if needs_ocr(text):
+                use_ocr = True
+                break
+
+            pages.append({
+                "page_num": i,
+                "text": text.lower()
+            })
+
+    if use_ocr:
+        print("⚠️ Using OCR fallback...")
+        return ocr_pdf(file_path)
+
+    return pages
+
+
+# -------------------------------
+# Section Keywords
+# -------------------------------
+SECTION_KEYWORDS = {
+    "balance_sheet": [
+        "balance sheet",
+        "statement of financial position"
+    ],
+    "income_statement": [
+        "statement of profit and loss",
+        "income statement",
+        "profit and loss"
+    ],
+    "cash_flow": [
+        "cash flow statement",
+        "statement of cash flows"
+    ],
+    "equity": [
+        "statement of changes in equity"
+    ]
+}
+
+
+# -------------------------------
+# Stop Keywords
+# -------------------------------
+STOP_KEYWORDS = [
+    "notes to financial statements",
+    "the accompanying notes",
+    "board of directors",
+    "auditors report"
+    # ⚠️ removed "corporate overview" because it appears everywhere
+]
+
+
+# -------------------------------
+# Detect Sections (fixed)
+# -------------------------------
+def detect_sections(pages):
+    detected = []
+    last_seen = {}
+
+    for page in pages:
+        text = page["text"]
+
+        for section, keywords in SECTION_KEYWORDS.items():
+            if any(keyword in text for keyword in keywords):
+
+                # skip duplicate detections on nearby pages
+                if section in last_seen and page["page_num"] - last_seen[section] <= 1:
+                    continue
+
+                detected.append({
+                    "section": section,
+                    "start_page": page["page_num"]
+                })
+
+                last_seen[section] = page["page_num"]
+
+    return detected
+
+
+# -------------------------------
+# Assign Section Ranges (fixed)
+# -------------------------------
+def assign_section_ranges(detected_sections, pages):
+    detected_sections = sorted(detected_sections, key=lambda x: x["start_page"])
+
+    results = []
+
+    for i, sec in enumerate(detected_sections):
+        start = sec["start_page"]
+
+        # default end = next section start
+        if i + 1 < len(detected_sections):
+            end = detected_sections[i + 1]["start_page"]
+        else:
+            end = len(pages)
+
+        # 🔥 refine end using STOP keywords (skip start page)
+        for j in range(start + 1, end):
+            if any(k in pages[j]["text"] for k in STOP_KEYWORDS):
+                end = j
+                break
+
+        results.append({
+            "section": sec["section"],
+            "start_page": start,
+            "end_page": end
+        })
+
+    return results
+
+
+# -------------------------------
+# Extract Section Text
+# -------------------------------
+def extract_sections_text(pages, section_ranges):
+    extracted = {}
+
+    for sec in section_ranges:
+        section_name = sec["section"]
+        start = sec["start_page"]
+        end = sec["end_page"]
+
+        text = ""
+
+        for i in range(start, end):
+            text += pages[i]["text"] + "\n"
+
+        extracted[section_name] = text
+
+    return extracted
+
+
+# -------------------------------
+# Validation
+# -------------------------------
+def validate_section(section_name, text):
+    checks = {
+        "balance_sheet": ["assets", "liabilities", "equity"],
+        "income_statement": ["revenue", "expenses", "profit"],
+        "cash_flow": ["operating", "investing", "financing"]
+    }
+
+    required = checks.get(section_name, [])
+
+    score = sum(1 for word in required if word in text)
+
+    return score / len(required) if required else 0
+
+
+# -------------------------------
+# Final Pipeline
+# -------------------------------
+def extract_financial_statements(file_path):
+    pages = extract_pdf_pages(file_path)
+
+    detected = detect_sections(pages)
+
+    if not detected:
+        print("❌ No sections detected")
+        return {}
+
+    section_ranges = assign_section_ranges(detected, pages)
+
+    # 🔍 Debug ranges
+    print("\n📊 Detected Section Ranges:")
+    for sec in section_ranges:
+        print(sec)
+
+    extracted = extract_sections_text(pages, section_ranges)
+
+    # 🔍 Validation scores
+    print("\n📊 Validation Scores:")
+    for sec, text in extracted.items():
+        score = validate_section(sec, text)
+        print(f"{sec}: {score:.2f}")
+
+    return extracted
+
+if __name__ == "__main__":
+    file_path = "data\Annual_Report_FY25-152-157.pdf"
+
+    results = extract_financial_statements(file_path)
+
+    for section, content in results.items():
+        print("\n====================")
+        print("SECTION:", section)
+        print("====================\n")
+        print(content[:10000])
