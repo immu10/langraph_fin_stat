@@ -101,7 +101,7 @@ def retrieve_documents(state: GraphState) -> Dict[str, Any]:
                     vectorstore = create_vectorstore(documents)
                     print("Successfully created vectorstore")
                 except Exception as e:
-                    print(f"Failed to create vectorstore: {e}")
+                    print(f"Failed to create vectorstore again: {e}")
                     return {"context": f"Error creating vectorstore: {e}"}
             else:
                 return {"context": "No documents found. Please add documents to ./data directory."}
@@ -110,7 +110,10 @@ def retrieve_documents(state: GraphState) -> Dict[str, Any]:
         print("Performing similarity search...")
         docs = vectorstore.similarity_search(state["question"], k=3)
         context = "\n\n".join([doc.page_content for doc in docs])
-        print(f"Retrieved {len(docs)} documents")
+        print(f"Retrieved {len(docs)} documents written in context.txt")
+        with open("context.txt", "w") as f:
+            f.write(context)
+
     else:
         context = "No vector store available."
         print("No vectorstore available")
