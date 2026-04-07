@@ -63,11 +63,11 @@ def ocr_pdf(file_path):
 # -------------------------------
 # Hybrid Extraction
 # -------------------------------
-def extract_pdf_pages(file_path):
+def extract_pdf_pages(uploaded_file):
     pages = []
     use_ocr = False
 
-    with pdfplumber.open(file_path) as pdf:
+    with pdfplumber.open(uploaded_file) as pdf:
         for i, page in enumerate(pdf.pages):
             text = page.extract_text()
 
@@ -220,8 +220,8 @@ def validate_section(section_name, text):
 # -------------------------------
 # Final Pipeline
 # -------------------------------
-def extract_financial_statements(file_path):
-    pages = extract_pdf_pages(file_path)
+def extract_financial_statements(uploaded_file):
+    pages = extract_pdf_pages(uploaded_file)
 
     detected = detect_sections(pages)
 
@@ -279,9 +279,9 @@ if __name__ == "__main__":
     #     print("====================\n")
     #     print(content[:10000])
 
-def vector_store_init():
+def vector_store_init(uploaded_file):
     file_path = r"data\Annual_Report_FY25-152-157.pdf"
-    results = extract_financial_statements(file_path)
+    results = extract_financial_statements(uploaded_file)
 
     documents = []
 

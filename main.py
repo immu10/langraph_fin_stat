@@ -1,6 +1,7 @@
 from langgraph.graph import START, StateGraph, END
+from config import embeddings
 from agents import GraphState, answer_relevancy_check, doc_required, retrieve_documents_for_question, generate_answer, should_retry
-from funcs.func import split_summary
+from langchain.vectorstores import Chroma
 import subprocess
 import sys
 import os
@@ -30,34 +31,36 @@ def build_rag_graph():
 
     return workflow.compile()
 
-def main():
+def rag_flow(question):
     """Main function to run the RAG system"""
     print("LangGraph RAG System")
     print("===================")
 
     # Build the graph
-    rag_graph = build_rag_graph()
+    
 
     # Example usage
-    while True:
-        question = input("\nEnter your question (or 'quit' to exit): ")
-        if question.lower() == 'quit':
-            break
+    # while True:
+    #     question = input("\nEnter your question (or 'quit' to exit): ")
+    #     if question.lower() == 'quit':
+    #         break
 
-        vector_store, data = split_summary()  # needs to change when defining ui
+    vector_store = Chroma(persist_directory="./chroma_db")  # needs to change when defining ui
         
-        # Save data to a JSON file so ui.py can access it
-        with open("shared_data.json", "w") as f:
-            json.dump(data, f)
+      
+        
         
         # Run the graph
-        result = rag_graph.invoke({
+    result = rag_graph.invoke({
         "vector_store": vector_store,
         "question": question,
         "relevancy_check_count": 0  # initialize here
     })
-        print(f"\nAnswer: {result['answer']}")
+    print(f"\nAnswer: {result['answer']}")
+    return result['answer']
 
 if __name__ == "__main__":
+    global rag_graph
+    rag_graph = build_rag_graph()
     ui_path = os.path.join(os.path.dirname(__file__), "ui.py")
     subprocess.run([sys.executable, "-m", "streamlit", "run", ui_path], check=True)

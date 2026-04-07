@@ -2,6 +2,8 @@ import streamlit as st
 import json
 import os
 
+from funcs.func import split_summary
+
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -388,7 +390,7 @@ if process_clicked and uploaded_file:
     with st.spinner("Processing document..."):
         # ── Replace below with your actual pipeline calls ──
         # vector_store, splits = vector_store_init(uploaded_file)
-        vector_store, summaries = split_summary(splits)
+        vector_store, summaries = split_summary(uploaded_file)
         st.session_state.vector_store = vector_store
         st.session_state.summaries = summaries
 
