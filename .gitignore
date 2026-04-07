@@ -2,3 +2,5 @@ models/
 data/*.pdf
 chroma_db/
 content.txt
+__pycache__/
+*.pyc
