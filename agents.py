@@ -72,9 +72,10 @@ def answer_relevancy_check(state: GraphState) -> Dict[str, Any]:
     prompt = get_relevency_prompt()
     chain = prompt | llm | StrOutputParser()
     relevancy = chain.invoke({"answer": state["answer"]})
+    print(relevancy["explanation"])
     
     return {
-        "relevancy": relevancy,
+        "relevancy": relevancy["relevancy"],
         "relevancy_check_count": state["relevancy_check_count"] + 1
     }
 
