@@ -1,5 +1,5 @@
-from langgraph.graph import StateGraph, END
-from agents import GraphState, answer_relevancy_check, retrieve_documents_for_question, generate_answer, should_retry
+from langgraph.graph import START, StateGraph, END
+from agents import GraphState, answer_relevancy_check, documents_required, retrieve_documents_for_question, generate_answer, should_retry
 from funcs.func import split_summary
 
 def build_rag_graph():
@@ -7,20 +7,22 @@ def build_rag_graph():
     workflow = StateGraph(GraphState)
 
     # Add nodes
+    workflow.add_node("documents_required", documents_required)
     workflow.add_node("retrieval", retrieve_documents_for_question)
     workflow.add_node("answer_relevancy_check", answer_relevancy_check)
     workflow.add_node("generate", generate_answer)
    
 
     # Add edges
-    workflow.set_entry_point("retrieval")
+    workflow.add_edge(START, "documents_required")
+    workflow.add_edge("documents_required", "retrieval")
     workflow.add_edge("retrieval", "generate")
+    workflow.add_edge("generate", "answer_relevancy_check")
     
     workflow.add_conditional_edges("answer_relevancy_check", should_retry, {
-    "end": "generate",
+    "end": END,
     "retry": "retrieval"  # or whatever node you want to loop back to
 })
-    workflow.add_edge("generate", END)
 
     return workflow.compile()
 
