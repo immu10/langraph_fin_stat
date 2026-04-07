@@ -7,15 +7,15 @@ def build_rag_graph():
     workflow = StateGraph(GraphState)
 
     # Add nodes
-    workflow.add_node("documents_required", doc_required)
+    workflow.add_node("doc_required", doc_required)
     workflow.add_node("retrieval", retrieve_documents_for_question)
     workflow.add_node("answer_relevancy_check", answer_relevancy_check)
     workflow.add_node("generate", generate_answer)
    
 
     # Add edges
-    workflow.add_edge(START, "documents_required")
-    workflow.add_edge("documents_required", "retrieval")
+    workflow.add_edge(START, "doc_required")
+    workflow.add_edge("doc_required", "retrieval")
     workflow.add_edge("retrieval", "generate")
     workflow.add_edge("generate", "answer_relevancy_check")
     
