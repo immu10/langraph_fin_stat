@@ -3,21 +3,26 @@ from typing import List
 from langchain_community.document_loaders import DirectoryLoader, TextLoader, PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from config import embeddings
+from config import embeddings,llm
 from funcs.func2 import vector_store_init
 
 vectorstore = None
 
-def create_doc_split():
-    """Creates Vector store for RAG"""
-    vector_store,split = vector_store_init()
-    return vector_store,split
+
 
 
 def split_summary():
     """ create summary of each section for site"""
-    vector_store,split = create_doc_split()
-    return vector_store,split
+    split = vector_store_init()
+    for _,doc in split:
+
+        prompt = f"Summarize the following financial document section in a concise manner, focusing on key financial metrics, trends, and insights. The summary should be clear and informative, suitable for a financial analyst:\n\n{doc.page_content}"
+        summary = llm(prompt)
+        print("\n====================")
+        print("SUMMARY:")
+        print("====================\n")
+        print(summary)
+    return split
 
 # ============= Document Loading =============
 

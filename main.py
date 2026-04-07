@@ -1,6 +1,10 @@
 from langgraph.graph import START, StateGraph, END
 from agents import GraphState, answer_relevancy_check, doc_required, retrieve_documents_for_question, generate_answer, should_retry
 from funcs.func import split_summary
+import subprocess
+import sys
+import os
+import json
 
 def build_rag_graph():
     """Build the RAG graph"""
@@ -40,7 +44,12 @@ def main():
         if question.lower() == 'quit':
             break
 
-        vector_store = split_summary()  # needs to change when defining ui
+        vector_store, data = split_summary()  # needs to change when defining ui
+        
+        # Save data to a JSON file so ui.py can access it
+        with open("shared_data.json", "w") as f:
+            json.dump(data, f)
+        
         # Run the graph
         result = rag_graph.invoke({
         "vector_store": vector_store,
@@ -50,4 +59,5 @@ def main():
         print(f"\nAnswer: {result['answer']}")
 
 if __name__ == "__main__":
-    main()
+    ui_path = os.path.join(os.path.dirname(__file__), "ui.py")
+    subprocess.run([sys.executable, "-m", "streamlit", "run", ui_path], check=True)

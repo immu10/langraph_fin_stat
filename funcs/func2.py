@@ -265,7 +265,7 @@ def create_vectorstore(documents: List[str]) -> Chroma:
         persist_directory="./chroma_db"
     )
 
-    return vectorstore
+    return 0
 
 if __name__ == "__main__":
     file_path = "data\Annual_Report_FY25-152-157.pdf"
@@ -289,7 +289,7 @@ def vector_store_init():
         if content.strip():  # avoid empty
             documents.append(f"{section.upper()}\n\n{content}")
 
-    vectorstore = create_vectorstore(documents)
+    create_vectorstore(documents)
 
     print("\n✅ Vector store created successfully!")
-    return vectorstore,results
+    return results

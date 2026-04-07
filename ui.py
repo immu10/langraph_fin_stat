@@ -1,4 +1,22 @@
 import streamlit as st
+import json
+import os
+
+# ── Load shared data from main.py ────────────────────────────────────────────────
+@st.cache_data
+def load_shared_data():
+    """Load data passed from main.py"""
+    if os.path.exists("shared_data.json"):
+        try:
+            with open("shared_data.json", "r") as f:
+                return json.load(f)
+        except Exception as e:
+            st.warning(f"Could not load shared data: {e}")
+            return {}
+    return {}
+
+# Load the data at startup
+shared_data = load_shared_data()
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -354,8 +372,6 @@ if "summaries" not in st.session_state:
     st.session_state.summaries = None
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-if "vector_store" not in st.session_state:
-    st.session_state.vector_store = None
 if "processing" not in st.session_state:
     st.session_state.processing = False
 
@@ -387,16 +403,16 @@ if process_clicked and uploaded_file:
     with st.spinner("Processing document..."):
         # ── Replace below with your actual pipeline calls ──
         # vector_store, splits = vector_store_init(uploaded_file)
-        # summaries = split_summary(splits)
-        # st.session_state.vector_store = vector_store
-        # st.session_state.summaries = summaries
+        vector_store, summaries = split_summary(splits)
+        st.session_state.vector_store = vector_store
+        st.session_state.summaries = summaries
 
         # Placeholder until pipeline is wired up
-        st.session_state.summaries = {
-            "balance_sheet": "Assets totalling $4.2B with strong liquidity position. Current ratio at 2.1x, long-term debt reduced by 12% YoY. Equity base expanded due to retained earnings.",
-            "cash_flow": "Operating cash flow of $820M, up 18% from prior year. CapEx of $210M focused on infrastructure. Free cash flow of $610M with $200M returned to shareholders.",
-            "pnl": "Revenue of $3.1B, gross margin at 58%. Operating expenses well controlled. Net income of $480M representing a 15.5% net margin, up 2.1pp YoY.",
-        }
+        # st.session_state.summaries = {
+        #     "balance_sheet": "Assets totalling $4.2B with strong liquidity position. Current ratio at 2.1x, long-term debt reduced by 12% YoY. Equity base expanded due to retained earnings.",
+        #     "cash_flow": "Operating cash flow of $820M, up 18% from prior year. CapEx of $210M focused on infrastructure. Free cash flow of $610M with $200M returned to shareholders.",
+        #     "pnl": "Revenue of $3.1B, gross margin at 58%. Operating expenses well controlled. Net income of $480M representing a 15.5% net margin, up 2.1pp YoY.",
+        # }
 
 # ── Summary cards ─────────────────────────────────────────────────────────────
 st.markdown("""

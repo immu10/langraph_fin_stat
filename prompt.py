@@ -29,7 +29,7 @@ def get_documents_req_prompt() -> ChatPromptTemplate:
 
     Question: {question}
 
-    List the required documents from the following options: ["balance_sheet", "income_statement", "cash_flow"] only in a list format(square brackets always) nothing else.
+    List the required documents from the following options: ["balance_sheet", "income_statement", "cash_flow"] only in a json format (curly brackets always) nothing else.
     """)
 
 from langchain_community.llms import Ollama
