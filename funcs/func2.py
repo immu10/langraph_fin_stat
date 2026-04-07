@@ -5,8 +5,8 @@ import re
 import json
 from typing import List
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Chroma
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
@@ -82,7 +82,7 @@ def extract_pdf_pages(uploaded_file):
 
     if use_ocr:
         print("⚠️ Using OCR fallback...")
-        return ocr_pdf(file_path)
+        return ocr_pdf(uploaded_file)
 
     return pages
 
@@ -186,17 +186,20 @@ def extract_sections_text(pages, section_ranges):
     extracted = {}
 
     for sec in section_ranges:
-        section_name = sec["section"]
-        start = sec["start_page"]
-        end = sec["end_page"]
+        if sec["section"] in ["balance_sheet", "income_statement", "cash_flow"]:
+            section_name = sec["section"]
+            start = sec["start_page"]
+            end = sec["end_page"]
 
-        lines = []
+            lines = []
 
-        for i in range(start, end):
-            page_text = pages[i]["text"]
-            lines.append(page_text.strip())
+            for i in range(start, end):
+                page_text = pages[i]["text"]
+                lines.append(page_text.strip())
 
-        extracted[section_name] = "\n\n".join(lines)
+            extracted[section_name] = "\n\n".join(lines)
+        else:
+            print(f"Skipping section {sec['section']} for now")
     return extracted
 
 
@@ -259,28 +262,16 @@ def create_vectorstore(documents: List[str]) -> Chroma:
 
     splits = text_splitter.create_documents(documents)
 
-    vectorstore = Chroma.from_documents(
+    vector_store = Chroma.from_documents(
         documents=splits,
         embedding=embeddings,
         persist_directory="./chroma_db"
     )
+    vector_store.persist()
 
     return 0
-
-if __name__ == "__main__":
-    file_path = "data\Annual_Report_FY25-152-157.pdf"
-
-    results = extract_financial_statements(file_path)
-    print(type(results))
-
-    # for section, content in results.items():
-    #     print("\n====================")
-    #     print("SECTION:", section)
-    #     print("====================\n")
-    #     print(content[:10000])
-
 def vector_store_init(uploaded_file):
-    file_path = r"data\Annual_Report_FY25-152-157.pdf"
+    # file_path = r"data\Annual_Report_FY25-152-157.pdf"
     results = extract_financial_statements(uploaded_file)
 
     documents = []
@@ -291,5 +282,20 @@ def vector_store_init(uploaded_file):
 
     create_vectorstore(documents)
 
+
     print("\n✅ Vector store created successfully!")
     return results
+
+if __name__ == "__main__":
+    file_path = "data\Annual_Report_FY25-152-157.pdf"
+
+    vector_store_init(file_path)
+    
+
+    # for section, content in results.items():
+    #     print("\n====================")
+    #     print("SECTION:", section)
+    #     print("====================\n")
+    #     print(content[:10000])
+
+    pass

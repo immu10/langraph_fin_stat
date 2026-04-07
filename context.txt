@@ -1,47 +1,114 @@
-Tax expense 22.a
-Current tax  3,338  -   
-Deferred tax charge / (credit)  4  (1,243)
-Total tax expense / (credit)  3,342  (1,243)
-Profit for the year  72,533  81,675 
-Other comprehensive income
-Items that will not be reclassified to profit or loss
-Remeasurements of defined benefit plans (net of tax) 17.b.(iv)  (52)  (181)
-Items that will be reclassified to profit or loss
-Debt instruments through other comprehensive income (net of tax) 17.c.  40  6 
-Other comprehensive income / (loss) for the year, net of tax  (12)  (175)
-Total comprehensive income for the year  72,521  81,500 
-Earnings per equity share of face value of Rs. 10 each (previous year Rs. 10 each) 37
-Basic (Rs.)  187.79  211.71 
-Diluted (Rs.)  187.54  211.48 
-Standalone Statement of Profit and Loss
-for the year ended March 31, 2025 
-(Rupees in millions, except for share data and if otherwise stated)
-The accompanying notes form an integral part of the standalone financial statements
-As per our report of even date attached
+(i) borrowings 18.a 18,000 18,917
+(ii) lease liabilities 18.b 103,386 115,249
+(iii) trade payables 20
+- total outstanding dues of micro enterprises and small enterprises 330 240
+- total outstanding dues of creditors other than micro enterprises and small 41,579 31,626
+enterprises
+(iv) other financial liabilities 18.c 77,506 70,460
+b. other current liabilities 21 82,716 64,632
+c. provisions 19 17,375 5,820
+d. current tax liabilities (net) 22.c 31 31
+e. deferred incentives 258 476
+total current liabilities 341,181 307,451
+total equity and liabilities 1,159,139 820,688
+the accompanying notes form an integral part of the standalone financial statements
+as per our report of even date attached
+for s.r. batliboi & co llp for and on behalf of the board of directors of
+chartered accountants interglobe aviation limited
+icai firm registration no.:
+301003e/e300005
+per sanjay vij venkataramani sumantran anil parashar
+partner chairman director
+membership no. 095169 din: 02153989 din: 00055377
 
-(ii)
- -    (357)  357  -    -    -    -   
-Share based payments expense 17.b.(i)  -    810  -    -    -    -    810 
-Balance as at March 31, 2025  -    1,062  40,705  389  47,007  41  89,204 
-*Other comprehensive income / (loss) represents remeasurement of defined benefit plans (net of tax) adjusted through retained 
-earnings and debt instruments through other comprehensive income (net of tax).
-152
-Annual Report 2024-25
+(i) borrowings 18.a 18,000 18,917
+(ii) lease liabilities 18.b 103,386 115,249
+(iii) trade payables 20
+- total outstanding dues of micro enterprises and small enterprises 330 240
+- total outstanding dues of creditors other than micro enterprises and small 41,579 31,626
+enterprises
+(iv) other financial liabilities 18.c 77,506 70,460
+b. other current liabilities 21 82,716 64,632
+c. provisions 19 17,375 5,820
+d. current tax liabilities (net) 22.c 31 31
+e. deferred incentives 258 476
+total current liabilities 341,181 307,451
+total equity and liabilities 1,159,139 820,688
+the accompanying notes form an integral part of the standalone financial statements
+as per our report of even date attached
+for s.r. batliboi & co llp for and on behalf of the board of directors of
+chartered accountants interglobe aviation limited
+icai firm registration no.:
+301003e/e300005
+per sanjay vij venkataramani sumantran anil parashar
+partner chairman director
+membership no. 095169 din: 02153989 din: 00055377
 
-Interest income from financial assets at amortised cost  (4,901)  (3,136)
-  Share based payments expense  803  433 
-  Unrealised loss / (gain) on change in fair value of derivatives (net)  80  (2)
-  Liabilities no longer required written back   (3)  (1)
-  Interest on borrowings measured at amortised cost  220  514 
-  Property, plant and equipment written off  482  703 
-  Profit on sale of property, plant and equipment (net)  (19)  (16)
-  Bad debts written off  14  1 
-  Impairment loss on trade receivables  14  3 
- Operating profit before working capital changes  200,141  173,552 
- Adjustments for: 
-  Increase in other financial assets and other assets  (42,120)  (25,275)
-  Increase in inventories  (1,955)  (337)
-   Increase in trade payables, other financial liabilities, other liabilities and provisions  89,769  70,192 
-  Increase in trade receivables  (1,058)  (1,197)
- Cash generated from operating activities  244,777  216,935 
- Income tax paid (net)  (4,130)  (5,107)
+(i) borrowings 18.a 18,000 18,917
+(ii) lease liabilities 18.b 103,386 115,249
+(iii) trade payables 20
+- total outstanding dues of micro enterprises and small enterprises 330 240
+- total outstanding dues of creditors other than micro enterprises and small 41,579 31,626
+enterprises
+(iv) other financial liabilities 18.c 77,506 70,460
+b. other current liabilities 21 82,716 64,632
+c. provisions 19 17,375 5,820
+d. current tax liabilities (net) 22.c 31 31
+e. deferred incentives 258 476
+total current liabilities 341,181 307,451
+total equity and liabilities 1,159,139 820,688
+the accompanying notes form an integral part of the standalone financial statements
+as per our report of even date attached
+for s.r. batliboi & co llp for and on behalf of the board of directors of
+chartered accountants interglobe aviation limited
+icai firm registration no.:
+301003e/e300005
+per sanjay vij venkataramani sumantran anil parashar
+partner chairman director
+membership no. 095169 din: 02153989 din: 00055377
+
+(i) borrowings 18.a 18,000 18,917
+(ii) lease liabilities 18.b 103,386 115,249
+(iii) trade payables 20
+- total outstanding dues of micro enterprises and small enterprises 330 240
+- total outstanding dues of creditors other than micro enterprises and small 41,579 31,626
+enterprises
+(iv) other financial liabilities 18.c 77,506 70,460
+b. other current liabilities 21 82,716 64,632
+c. provisions 19 17,375 5,820
+d. current tax liabilities (net) 22.c 31 31
+e. deferred incentives 258 476
+total current liabilities 341,181 307,451
+total equity and liabilities 1,159,139 820,688
+the accompanying notes form an integral part of the standalone financial statements
+as per our report of even date attached
+for s.r. batliboi & co llp for and on behalf of the board of directors of
+chartered accountants interglobe aviation limited
+icai firm registration no.:
+301003e/e300005
+per sanjay vij venkataramani sumantran anil parashar
+partner chairman director
+membership no. 095169 din: 02153989 din: 00055377
+
+(i) borrowings 18.a 18,000 18,917
+(ii) lease liabilities 18.b 103,386 115,249
+(iii) trade payables 20
+- total outstanding dues of micro enterprises and small enterprises 330 240
+- total outstanding dues of creditors other than micro enterprises and small 41,579 31,626
+enterprises
+(iv) other financial liabilities 18.c 77,506 70,460
+b. other current liabilities 21 82,716 64,632
+c. provisions 19 17,375 5,820
+d. current tax liabilities (net) 22.c 31 31
+e. deferred incentives 258 476
+total current liabilities 341,181 307,451
+total equity and liabilities 1,159,139 820,688
+the accompanying notes form an integral part of the standalone financial statements
+as per our report of even date attached
+for s.r. batliboi & co llp for and on behalf of the board of directors of
+chartered accountants interglobe aviation limited
+icai firm registration no.:
+301003e/e300005
+per sanjay vij venkataramani sumantran anil parashar
+partner chairman director
+membership no. 095169 din: 02153989 din: 00055377

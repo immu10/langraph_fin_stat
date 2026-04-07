@@ -4,12 +4,13 @@ from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 from langchain_core.prompts import ChatPromptTemplate
 from typing_extensions import TypedDict
 from config import llm
-from prompt import get_rag_prompt, get_relevency_prompt, get_documents_req_prompt
+from prompt import get_rag_prompt, get_relevency_prompt, get_documents_req_prompt, get_query_construction_prompt
 
 class GraphState(TypedDict):
     vector_store : Any
     documents_required: list
     question: str
+    query:str
     context: str
     answer: str
     relevancy: str
@@ -19,7 +20,6 @@ class GraphState(TypedDict):
 def doc_required(state: GraphState) -> dict:
     """Determine which documents are required"""
     
-    prompt = get_documents_req_prompt()
     response_schemas = [
         ResponseSchema(
             name="documents_required",
@@ -28,10 +28,23 @@ def doc_required(state: GraphState) -> dict:
     ]
 
     output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
-    chain = prompt | llm | output_parser
-    result = chain.invoke({"question": state["question"]})
+    format_instructions = output_parser.get_format_instructions()
+    prompt = get_documents_req_prompt()
 
-    return {"documents_required": result}  
+    chain = prompt | llm | output_parser
+    result = chain.invoke({"question": state["question"], "format_instructions": format_instructions})
+
+    return {"documents_required": result}
+
+def query_construction(state: GraphState) -> dict:
+    """Construct query for vectorstore retrieval"""
+    # For simplicity, we will just use the original question as the query
+    # In a real implementation, you might want to do some processing here
+    prompt = get_query_construction_prompt()
+    chain = prompt | llm | StrOutputParser()
+    query = chain.invoke({"question": state["question"], "documents_required": state["documents_required"]})
+    print(f"Constructed query: {query}")
+    return {"query": query}  
 
 
 
@@ -44,7 +57,7 @@ def retrieve_documents_for_question(state: GraphState) -> Dict[str, Any]:
         raise ValueError("Vectorstore is not accessible. Please ensure it is created successfully.")
     
     print("Performing similarity search...")
-    docs = vectorstore.similarity_search(state["question"], k=5)
+    docs = vectorstore.similarity_search(state["query"], k=5)
     context = "\n\n".join([doc.page_content for doc in docs])
     print(f"Retrieved {len(docs)} documents written in context.txt")
     
@@ -72,11 +85,11 @@ def answer_relevancy_check(state: GraphState) -> Dict[str, Any]:
     """Check if answer is relevant to question"""
     prompt = get_relevency_prompt()
     chain = prompt | llm | StrOutputParser()
-    relevancy = chain.invoke({"answer": state["answer"]})
-    print(relevancy["explanation"])
+    relevancy = chain.invoke({"answer": state["answer"], "question": state["question"]})
+    # print(relevancy["explanation"])
     
     return {
-        "relevancy": relevancy["relevancy"],
+        "relevancy": relevancy.strip().lower(),
         "relevancy_check_count": state["relevancy_check_count"] + 1
     }
 
@@ -84,3 +97,16 @@ def should_retry(state: GraphState) -> str:
     if state["relevancy"] == "yes" or state["relevancy_check_count"] >= 3:
         return "end"
     return "retry"
+
+# if __name__ == "__main__":
+#     from langchain_community.vectorstores import Chroma
+#     # vector_store = Chroma(persist_directory="./chroma_db") 
+#     query = "Standalone Balance Sheet"
+#     docs = vector_store.get()
+
+#     for i, text in enumerate(docs["documents"]):
+#         print(f"\n--- Document {i+1} ---")
+#         print(text)
+#     print(f"Retrieved {len(docs)} documents:")
+#     print("IDs:", docs["ids"])
+#     print("Number of documents:", len(docs["ids"]))

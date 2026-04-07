@@ -26,15 +26,39 @@ def get_documents_req_prompt() -> ChatPromptTemplate:
     """Get the document requirement prompt template"""
     return ChatPromptTemplate.from_template("""
     You are a helpful assistant. Determine which documents of the three  are required to answer the question.
-
+                                            
+    Output format: {format_instructions}
     Question: {question}
 
-    List the required documents from the following options: ["balance_sheet", "income_statement", "cash_flow"] only in a json format (curly brackets always) nothing else.
+    List the documents required from the following options: ["balance_sheet", "income_statement", "cash_flow"] only in a json format (curly brackets always) nothing else.
     """)
+def get_query_construction_prompt() -> ChatPromptTemplate:
+    return ChatPromptTemplate.from_template("""
+You are a query generator for a vector database.
 
-from langchain_community.llms import Ollama
+Your task is to construct a search query using the given question and required documents.
+
+STRICT RULES:
+- Output ONLY the final query
+- Do NOT include explanations
+- Do NOT include prefixes like "Sure", "Here is", "Query =", etc.
+- Do NOT include any extra text, markdown, or formatting
+- Output must be a single line
+- Do NOT wrap the output in quotes
+- Do NOT use natural language sentences
+- Use only keywords with spaces in between each suitable for vector search
+  balance_sheets are assets and liabilities, income_statements are profit and loss tables that have income expenses and taxes, cash_flow describes the cash inflows and outflows from operating, investing and financing activities.                                          
+
+Question: {question}
+
+Required Documents categories: {documents_required}
+
+Return only the query.
+""")
+
 
 if __name__ == "__main__":
+    from langchain_community.llms import Ollama
     # Initialize LLM
     llm = Ollama(
         model="llama2:13b",

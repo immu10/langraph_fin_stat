@@ -1,9 +1,9 @@
 import streamlit as st
 import json
 import os
-
+from langchain_community.vectorstores import Chroma
 from funcs.func import split_summary
-
+import main  # Import your main module
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -361,6 +361,8 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "processing" not in st.session_state:
     st.session_state.processing = False
+if "chat_input_counter" not in st.session_state:
+    st.session_state.chat_input_counter = 0
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -388,18 +390,10 @@ with col_btn:
 
 if process_clicked and uploaded_file:
     with st.spinner("Processing document..."):
-        # ── Replace below with your actual pipeline calls ──
-        # vector_store, splits = vector_store_init(uploaded_file)
-        vector_store, summaries = split_summary(uploaded_file)
-        st.session_state.vector_store = vector_store
+        summaries = split_summary(uploaded_file)
+        # Reload the vector store after processing the document
+        main.vector_store = Chroma(persist_directory="./chroma_db")
         st.session_state.summaries = summaries
-
-        # Placeholder until pipeline is wired up
-        # st.session_state.summaries = {
-        #     "balance_sheet": "Assets totalling $4.2B with strong liquidity position. Current ratio at 2.1x, long-term debt reduced by 12% YoY. Equity base expanded due to retained earnings.",
-        #     "cash_flow": "Operating cash flow of $820M, up 18% from prior year. CapEx of $210M focused on infrastructure. Free cash flow of $610M with $200M returned to shareholders.",
-        #     "pnl": "Revenue of $3.1B, gross margin at 58%. Operating expenses well controlled. Net income of $480M representing a 15.5% net margin, up 2.1pp YoY.",
-        # }
 
 # ── Summary cards ─────────────────────────────────────────────────────────────
 st.markdown("""
@@ -430,10 +424,42 @@ def render_card(col, css_class, icon, title, key):
 
 render_card(c1, "card-bs",  "🏦", "Balance Sheet",    "balance_sheet")
 render_card(c2, "card-cf",  "💸", "Cash Flow",         "cash_flow")
-render_card(c3, "card-pnl", "📈", "P&L / Income",      "pnl")
+render_card(c3, "card-pnl", "📈", "P&L / Income",      "income_statement")
+
+# ── Chat functionality ─────────────────────────────────────────────────────────
+# Hidden text input to receive messages from JavaScript
+chat_input_key = f"chat_input_{st.session_state.chat_input_counter}"
+user_message = st.text_input("chat_receiver", key=chat_input_key, label_visibility="collapsed")
+for msg in st.session_state.chat_history:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# Process new message
+if user_message and user_message.strip():
+    # Add user message to history
+    st.session_state.chat_history.append({
+        "role": "user",
+        "content": user_message
+    })
+    
+    # Get bot response from RAG
+    try:
+        bot_response = main.rag_flow(question=user_message)
+        st.session_state.chat_history.append({
+            "role": "bot",
+            "content": bot_response
+        })
+    except Exception as e:
+        st.session_state.chat_history.append({
+            "role": "bot",
+            "content": f"Error: {str(e)}"
+        })
+    
+    # Increment counter to reset input
+    st.session_state.chat_input_counter += 1
+    st.rerun()
 
 # ── Chat overlay + FAB ────────────────────────────────────────────────────────
-# Build message HTML from session state
 def build_messages_html():
     if not st.session_state.chat_history:
         return """
@@ -445,7 +471,8 @@ def build_messages_html():
     html = ""
     for msg in st.session_state.chat_history:
         css = "msg-user" if msg["role"] == "user" else "msg-bot"
-        html += f'<div class="msg {css}">{msg["content"]}</div>'
+        content = msg["content"].replace("\n", "<br>")  # Preserve line breaks
+        html += f'<div class="msg {css}">{content}</div>'
     return html
 
 messages_html = build_messages_html()
@@ -476,9 +503,19 @@ st.markdown(f"""
 </div>
 
 <script>
+const stTextInput = window.parent.document.querySelector('input[aria-label="chat_receiver"]');
+
 function toggleChat() {{
     const overlay = document.getElementById('chat-overlay');
     overlay.classList.toggle('open');
+    
+    // Auto-scroll to bottom when opening
+    if (overlay.classList.contains('open')) {{
+        setTimeout(() => {{
+            const messages = document.getElementById('chat-messages');
+            messages.scrollTop = messages.scrollHeight;
+        }}, 100);
+    }}
 }}
 
 function sendMessage() {{
@@ -486,34 +523,30 @@ function sendMessage() {{
     const msg = input.value.trim();
     if (!msg) return;
 
-    // Append user message to chat
-    const messages = document.getElementById('chat-messages');
-    
-    // Remove empty state if present
-    const emptyState = messages.querySelector('.chat-empty-state');
-    if (emptyState) emptyState.remove();
+    // Send message to Streamlit via hidden text input
+    if (stTextInput) {{
+        stTextInput.value = msg;
+        stTextInput.dispatchEvent(new Event('input', {{ bubbles: true }}));
+        stTextInput.dispatchEvent(new Event('change', {{ bubbles: true }}));
+        
+        // Trigger Streamlit's enter key event
+        const enterEvent = new KeyboardEvent('keydown', {{
+            key: 'Enter',
+            code: 'Enter',
+            keyCode: 13,
+            bubbles: true
+        }});
+        stTextInput.dispatchEvent(enterEvent);
+    }}
 
-    const userDiv = document.createElement('div');
-    userDiv.className = 'msg msg-user';
-    userDiv.textContent = msg;
-    messages.appendChild(userDiv);
-
+    // Clear input
     input.value = '';
-    messages.scrollTop = messages.scrollHeight;
-
-    // Send to Streamlit via query param trick
-    // Wire this to your /chat endpoint or graph2.invoke()
-    const botDiv = document.createElement('div');
-    botDiv.className = 'msg msg-bot';
-    botDiv.textContent = '...';
-    messages.appendChild(botDiv);
-    messages.scrollTop = messages.scrollHeight;
-
-    // TODO: replace with actual fetch to your backend
-    setTimeout(() => {{
-        botDiv.textContent = 'This will be answered by your RAG pipeline once wired up.';
-        messages.scrollTop = messages.scrollHeight;
-    }}, 800);
 }}
+
+// Auto-scroll to bottom on load
+window.addEventListener('load', () => {{
+    const messages = document.getElementById('chat-messages');
+    messages.scrollTop = messages.scrollHeight;
+}});
 </script>
 """, unsafe_allow_html=True)
