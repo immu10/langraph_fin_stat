@@ -98,15 +98,15 @@ def should_retry(state: GraphState) -> str:
         return "end"
     return "retry"
 
-# if __name__ == "__main__":
-#     from langchain_community.vectorstores import Chroma
-#     # vector_store = Chroma(persist_directory="./chroma_db") 
-#     query = "Standalone Balance Sheet"
-#     docs = vector_store.get()
+if __name__ == "__main__":
+    from langchain_community.vectorstores import Chroma
+    vector_store = Chroma(persist_directory="./chroma_db") 
+    query = "profit"
+    docs = vector_store.get()
 
-#     for i, text in enumerate(docs["documents"]):
-#         print(f"\n--- Document {i+1} ---")
-#         print(text)
-#     print(f"Retrieved {len(docs)} documents:")
-#     print("IDs:", docs["ids"])
-#     print("Number of documents:", len(docs["ids"]))
+    for i, text in enumerate(docs["documents"]):
+        print(f"\n--- Document {i+1} ---")
+        print(text)
+    print(f"Retrieved {len(docs)} documents:")
+    print("IDs:", docs["ids"])
+    print("Number of documents:", len(docs["ids"]))

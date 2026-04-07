@@ -25,7 +25,7 @@ def get_relevency_prompt() -> ChatPromptTemplate:
 def get_documents_req_prompt() -> ChatPromptTemplate:
     """Get the document requirement prompt template"""
     return ChatPromptTemplate.from_template("""
-    You are a helpful assistant. Determine which documents of the three  are required to answer the question.
+    You are a helpful assistant. Determine which document(s) of the three  are required to answer the question.
                                             
     Output format: {format_instructions}
     Question: {question}
@@ -47,7 +47,8 @@ STRICT RULES:
 - Do NOT wrap the output in quotes
 - Do NOT use natural language sentences
 - Use only keywords with spaces in between each suitable for vector search
-  balance_sheets are assets and liabilities, income_statements are profit and loss tables that have income expenses and taxes, cash_flow describes the cash inflows and outflows from operating, investing and financing activities.                                          
+  balance_sheets are assets and liabilities, income_statements are profit and loss tables that have income expenses and taxes, cash_flow describes the cash inflows and outflows from operating, investing and financing activities.
+ use the above mentioned keywords to construct the query based on the question and required documents and combinations if required but no symbols.                                          
 
 Question: {question}
 
