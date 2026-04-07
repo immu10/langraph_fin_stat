@@ -4,7 +4,7 @@ from langchain_community.document_loaders import DirectoryLoader, TextLoader, Py
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from config import embeddings
-from func2 import vector_store_init
+from funcs.func2 import vector_store_init
 
 vectorstore = None
 
@@ -17,11 +17,7 @@ def create_doc_split():
 def split_summary():
     """ create summary of each section for site"""
     vector_store,split = create_doc_split()
-
-
-    
-    
-    pass
+    return vector_store,split
 
 # ============= Document Loading =============
 

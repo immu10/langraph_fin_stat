@@ -1,8 +1,9 @@
 from typing import Dict, Any
-from langchain_core.output_parsers import StrOutputParser, ResponseSchema, StructuredOutputParser
+from langchain_core.output_parsers import StrOutputParser
+from langchain.output_parsers import StructuredOutputParser, ResponseSchema
+from langchain_core.prompts import ChatPromptTemplate
 from typing_extensions import TypedDict
 from config import llm
-from langraph_fin_stat.funcs.func import get_vectorstore
 from prompt import get_rag_prompt, get_relevency_prompt, get_documents_req_prompt
 
 class GraphState(TypedDict):
@@ -15,7 +16,7 @@ class GraphState(TypedDict):
     relevancy_check_count: int
 
 
-def documents_required(state: GraphState) -> dict:
+def doc_required(state: GraphState) -> dict:
     """Determine which documents are required"""
     
     prompt = get_documents_req_prompt()

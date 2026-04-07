@@ -1,5 +1,5 @@
 from langgraph.graph import START, StateGraph, END
-from agents import GraphState, answer_relevancy_check, documents_required, retrieve_documents_for_question, generate_answer, should_retry
+from agents import GraphState, answer_relevancy_check, doc_required, retrieve_documents_for_question, generate_answer, should_retry
 from funcs.func import split_summary
 
 def build_rag_graph():
@@ -7,7 +7,7 @@ def build_rag_graph():
     workflow = StateGraph(GraphState)
 
     # Add nodes
-    workflow.add_node("documents_required", documents_required)
+    workflow.add_node("documents_required", doc_required)
     workflow.add_node("retrieval", retrieve_documents_for_question)
     workflow.add_node("answer_relevancy_check", answer_relevancy_check)
     workflow.add_node("generate", generate_answer)
