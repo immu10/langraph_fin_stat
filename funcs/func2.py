@@ -2,6 +2,15 @@ import pdfplumber
 import pytesseract
 from pdf2image import convert_from_path
 import re
+import json
+from typing import List
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import Chroma
+from langchain.embeddings import HuggingFaceEmbeddings
+
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 
 # -------------------------------
 # OCR Decision
@@ -109,7 +118,6 @@ STOP_KEYWORDS = [
     "the accompanying notes",
     "board of directors",
     "auditors report"
-    # ⚠️ removed "corporate overview" because it appears everywhere
 ]
 
 
@@ -157,7 +165,6 @@ def assign_section_ranges(detected_sections, pages):
         else:
             end = len(pages)
 
-        # 🔥 refine end using STOP keywords (skip start page)
         for j in range(start + 1, end):
             if any(k in pages[j]["text"] for k in STOP_KEYWORDS):
                 end = j
@@ -183,13 +190,13 @@ def extract_sections_text(pages, section_ranges):
         start = sec["start_page"]
         end = sec["end_page"]
 
-        text = ""
+        lines = []
 
         for i in range(start, end):
-            text += pages[i]["text"] + "\n"
+            page_text = pages[i]["text"]
+            lines.append(page_text.strip())
 
-        extracted[section_name] = text
-
+        extracted[section_name] = "\n\n".join(lines)
     return extracted
 
 
@@ -230,22 +237,56 @@ def extract_financial_statements(file_path):
         print(sec)
 
     extracted = extract_sections_text(pages, section_ranges)
-
+    splits = json.dumps(extracted, indent=2)
     # 🔍 Validation scores
     print("\n📊 Validation Scores:")
     for sec, text in extracted.items():
         score = validate_section(sec, text)
         print(f"{sec}: {score:.2f}")
 
-    return extracted
+    return splits
+
+def create_vectorstore(documents: List[str]) -> Chroma:
+    """Create vector store from documents"""
+
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200
+    )
+
+    splits = text_splitter.create_documents(documents)
+
+    vectorstore = Chroma.from_documents(
+        documents=splits,
+        embedding=embeddings,
+        persist_directory="./chroma_db"
+    )
+
+    return vectorstore
 
 if __name__ == "__main__":
     file_path = "data\Annual_Report_FY25-152-157.pdf"
 
     results = extract_financial_statements(file_path)
+    print(results)
+
+    # for section, content in results.items():
+    #     print("\n====================")
+    #     print("SECTION:", section)
+    #     print("====================\n")
+    #     print(content[:10000])
+
+def vector_store_init():
+    file_path = r"C:/Users/rusty/OneDrive/Desktop/langraph_fin_stat/langraph_fin_stat/data/Annual_Report_FY25-152-157.pdf"
+    results = extract_financial_statements(file_path)
+
+    documents = []
 
     for section, content in results.items():
-        print("\n====================")
-        print("SECTION:", section)
-        print("====================\n")
-        print(content[:10000])
+        if content.strip():  # avoid empty
+            documents.append(f"{section.upper()}\n\n{content}")
+
+    vectorstore = create_vectorstore(documents)
+
+    print("\n✅ Vector store created successfully!")
+    return vectorstore,results
