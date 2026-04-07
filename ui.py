@@ -2,21 +2,6 @@ import streamlit as st
 import json
 import os
 
-# ── Load shared data from main.py ────────────────────────────────────────────────
-@st.cache_data
-def load_shared_data():
-    """Load data passed from main.py"""
-    if os.path.exists("shared_data.json"):
-        try:
-            with open("shared_data.json", "r") as f:
-                return json.load(f)
-        except Exception as e:
-            st.warning(f"Could not load shared data: {e}")
-            return {}
-    return {}
-
-# Load the data at startup
-shared_data = load_shared_data()
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
