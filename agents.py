@@ -11,10 +11,22 @@ class GraphState(TypedDict):
     context: str
     answer: str
 
-def retrieve_documents(state: GraphState) -> Dict[str, Any]:
+def create_doc_split(state: GraphState) -> Dict[str, Any]:
+    """Takes document to make vector store for RAG"""
+    
+
+    
+    return {"documents": state["documents"]}
+
+
+
+
+def retrieve_documents_for_question(state: GraphState) -> Dict[str, Any]:
     """Retrieve relevant documents for the question"""
     print("Checking vectorstore...")
     vectorstore = get_vectorstore()
+    if vectorstore is None:
+        raise ValueError("Vectorstore is not accessible. Please ensure it is created successfully.")
     
     print("Performing similarity search...")
     docs = vectorstore.similarity_search(state["question"], k=3)

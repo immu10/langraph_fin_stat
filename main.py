@@ -1,12 +1,12 @@
 from langgraph.graph import StateGraph, END
-from agents import GraphState, retrieve_documents, generate_answer
+from agents import GraphState, retrieve_documents_for_question, generate_answer
 
 def build_rag_graph():
     """Build the RAG graph"""
     workflow = StateGraph(GraphState)
 
     # Add nodes
-    workflow.add_node("retrieve", retrieve_documents)
+    workflow.add_node("retrieve_documents", retrieve_documents_for_question)
     workflow.add_node("generate", generate_answer)
 
     # Add edges
