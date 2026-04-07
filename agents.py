@@ -2,7 +2,7 @@ from typing import Dict, Any
 from langchain_core.output_parsers import StrOutputParser
 from typing_extensions import TypedDict
 from config import llm
-from func import get_vectorstore
+from langraph_fin_stat.funcs.func import get_vectorstore
 from prompt import get_rag_prompt
 
 class GraphState(TypedDict):
