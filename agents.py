@@ -77,7 +77,7 @@ def retrieve_documents_for_question(state: GraphState) -> Dict[str, Any]:
     
     print("Performing similarity search...")
     docs = vectorstore.similarity_search(state["query"], k=5)
-    context = "\n\n".join([doc for doc in docs["documents"]])
+    context = "\n\n".join([doc for doc in docs])
     print(f"Retrieved {len(docs)} documents written in context.txt")
     
     # Save context to file for debugging

@@ -501,7 +501,7 @@ if st.session_state.chat_open:
             "content": user_message
         })
         try:
-            bot_response = main.rag_flow(question=user_message)
+            bot_response = main.rag_flow(question=user_message,summaries=st.session_state.summaries)
             st.session_state.chat_history.append({
                 "role": "bot",
                 "content": bot_response
