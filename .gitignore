@@ -5,3 +5,4 @@ content.txt
 __pycache__/
 *.pyc
 .vscode/
+context.txt
