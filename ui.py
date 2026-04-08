@@ -351,6 +351,48 @@ h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+
+/* ── Floating chat bubble + panel ── */
+.chat-bubble-btn {
+    position: fixed;
+    right: 32px;
+    bottom: 32px;
+    z-index: 1000;
+}
+.chat-bubble-btn .stButton > button {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    padding: 0 !important;
+    background: #f5c842 !important;
+    color: #0a0a0f !important;
+    box-shadow: 0 4px 24px rgba(245,200,66,0.4) !important;
+    font-size: 1.4rem !important;
+    line-height: 1 !important;
+    transition: all 0.2s !important;
+}
+.chat-bubble-btn .stButton > button:hover {
+    transform: scale(1.08) !important;
+    background: #ffd84d !important;
+    box-shadow: 0 6px 32px rgba(245,200,66,0.55) !important;
+}
+
+.chat-panel-wrap {
+    position: fixed;
+    right: 32px;
+    bottom: 100px;
+    width: 380px;
+    max-height: 520px;
+    overflow-y: auto;
+    background: #111116;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    z-index: 999;
+    padding: 14px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -363,6 +405,8 @@ if "processing" not in st.session_state:
     st.session_state.processing = False
 if "chat_input_counter" not in st.session_state:
     st.session_state.chat_input_counter = 0
+if "chat_open" not in st.session_state:
+    st.session_state.chat_open = False
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -426,129 +470,60 @@ render_card(c1, "card-bs",  "🏦", "Balance Sheet",    "balance_sheet")
 render_card(c2, "card-cf",  "💸", "Cash Flow",         "cash_flow")
 render_card(c3, "card-pnl", "📈", "P&L / Income",      "income_statement")
 
-# ── Chat functionality ─────────────────────────────────────────────────────────
-# Hidden text input to receive messages from JavaScript
-chat_input_key = f"chat_input_{st.session_state.chat_input_counter}"
-user_message = user_message = st.chat_input("Type here...")
+# ── Chat bubble + toggle panel (not dropdown) ─────────────────────────────────
+st.markdown('<div class="chat-bubble-btn">', unsafe_allow_html=True)
+if st.button("💬", key="chat_bubble_btn", help="Ask a question about your uploaded report"):
+    st.session_state.chat_open = not st.session_state.chat_open
+st.markdown('</div>', unsafe_allow_html=True)
 
+if st.session_state.chat_open:
+    st.markdown('<div class="chat-panel-wrap">', unsafe_allow_html=True)
+    top_left, top_right = st.columns([4, 1])
+    with top_left:
+        st.markdown("**Ask FinLens**")
+        st.caption("RAG-powered document Q&A")
+    with top_right:
+        if st.button("✕", key="close_chat_btn"):
+            st.session_state.chat_open = False
+            st.rerun()
 
-for msg in st.session_state.chat_history:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# Process new message
-if user_message and user_message.strip():
-    # Add user message to history
-    st.session_state.chat_history.append({
-        "role": "user",
-        "content": user_message
-    })
-    
-    # Get bot response from RAG
-    try:
-        bot_response = main.rag_flow(question=user_message)
-        st.session_state.chat_history.append({
-            "role": "bot",
-            "content": bot_response
-        })
-    except Exception as e:
-        st.session_state.chat_history.append({
-            "role": "bot",
-            "content": f"Error: {str(e)}"
-        })
-    
-    # Increment counter to reset input
-    st.session_state.chat_input_counter += 1
-    st.rerun()
-
-# ── Chat overlay + FAB ────────────────────────────────────────────────────────
-def build_messages_html():
     if not st.session_state.chat_history:
-        return """
+        st.markdown("""
         <div class="chat-empty-state">
             <span>💬</span>
             <div>Ask anything about the<br>uploaded financial document</div>
         </div>
-        """
-    html = ""
-    for msg in st.session_state.chat_history:
-        css = "msg-user" if msg["role"] == "user" else "msg-bot"
-        content = msg["content"].replace("\n", "<br>")  # Preserve line breaks
-        html += f'<div class="msg {css}">{content}</div>'
-    return html
+        """, unsafe_allow_html=True)
+    else:
+        for msg in st.session_state.chat_history:
+            css = "msg-user" if msg["role"] == "user" else "msg-bot"
+            content = msg["content"].replace("\n", "<br>")
+            st.markdown(f'<div class="msg {css}">{content}</div>', unsafe_allow_html=True)
 
-messages_html = build_messages_html()
+    with st.form("chat_form", clear_on_submit=True):
+        user_message = st.text_input(
+            "Ask about the financials...",
+            label_visibility="collapsed",
+            placeholder="Ask about the financials..."
+        )
+        sent = st.form_submit_button("Send")
 
-st.markdown(f"""
-<!-- Floating action button -->
-<button id="chat-fab" onclick="toggleChat()" title="Ask a question">💬</button>
+    if sent and user_message.strip():
+        st.session_state.chat_history.append({
+            "role": "user",
+            "content": user_message
+        })
+        try:
+            bot_response = main.rag_flow(question=user_message)
+            st.session_state.chat_history.append({
+                "role": "bot",
+                "content": bot_response
+            })
+        except Exception as e:
+            st.session_state.chat_history.append({
+                "role": "bot",
+                "content": f"Error: {str(e)}"
+            })
+        st.rerun()
 
-<!-- Chat overlay -->
-<div id="chat-overlay">
-  <div class="chat-header">
-    <div>
-      <div class="chat-header-title">Ask FinLens</div>
-      <div class="chat-header-sub">RAG-powered document Q&A</div>
-    </div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
-  </div>
-
-  <div class="chat-messages" id="chat-messages">
-    {messages_html}
-  </div>
-
-  <div class="chat-input-wrap">
-    <input id="chat-input" type="text" placeholder="Ask about the financials..." 
-           onkeydown="if(event.key==='Enter') sendMessage()" />
-    <button id="chat-send" onclick="sendMessage()">↑</button>
-  </div>
-</div>
-
-<script>
-const stTextInput = window.parent.document.querySelector('input[aria-label="chat_receiver"]');
-
-function toggleChat() {{
-    const overlay = document.getElementById('chat-overlay');
-    overlay.classList.toggle('open');
-    
-    // Auto-scroll to bottom when opening
-    if (overlay.classList.contains('open')) {{
-        setTimeout(() => {{
-            const messages = document.getElementById('chat-messages');
-            messages.scrollTop = messages.scrollHeight;
-        }}, 100);
-    }}
-}}
-
-function sendMessage() {{
-    const input = document.getElementById('chat-input');
-    const msg = input.value.trim();
-    if (!msg) return;
-
-    // Send message to Streamlit via hidden text input
-    if (stTextInput) {{
-        stTextInput.value = msg;
-        stTextInput.dispatchEvent(new Event('input', {{ bubbles: true }}));
-        stTextInput.dispatchEvent(new Event('change', {{ bubbles: true }}));
-        
-        // Trigger Streamlit's enter key event
-        const enterEvent = new KeyboardEvent('keydown', {{
-            key: 'Enter',
-            code: 'Enter',
-            keyCode: 13,
-            bubbles: true
-        }});
-        stTextInput.dispatchEvent(enterEvent);
-    }}
-
-    // Clear input
-    input.value = '';
-}}
-
-// Auto-scroll to bottom on load
-window.addEventListener('load', () => {{
-    const messages = document.getElementById('chat-messages');
-    messages.scrollTop = messages.scrollHeight;
-}});
-</script>
-""", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)

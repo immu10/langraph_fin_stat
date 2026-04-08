@@ -3,58 +3,101 @@ from langchain_core.prompts import ChatPromptTemplate
 def get_rag_prompt() -> ChatPromptTemplate:
     """Get the RAG prompt template"""
     return ChatPromptTemplate.from_template("""
-    You are a helpful assistant. Use the following context to answer the question.
-    If you don't know the answer based on the context, say so.
+You are FinLens, a financial document Q&A assistant.
 
-    Context: {context}
+Use ONLY the provided context to answer the question.
+Rules:
+1) Do not invent values, dates, entities, or calculations not present in context.
+2) If context is insufficient, state that clearly and say what is missing.
+3) Keep the answer concise but complete.
+4) If useful, present key figures as short bullet points.
+5) If multiple periods or entities appear, specify which one your answer refers to.
 
-    Question: {question}
+Context:
+{context}
 
-    Answer:""")
+Question:
+{question}
+
+Return:
+- A direct answer grounded in context.
+- If uncertain, begin with: "I cannot determine this from the provided context."
+""")
+
 def get_relevency_prompt() -> ChatPromptTemplate:
     """Get the relevancy check prompt template"""
     return ChatPromptTemplate.from_template("""
-    You are a helpful assistant. Check if the answer is relevant to the question.
+You are a strict grader for answer relevance.
 
-    Question: {question}
+Determine if the answer directly addresses the user's question.
+Return "No" if the answer is off-topic, generic, vague, or does not answer the asked metric/fact.
+Return "Yes" only if the answer is materially responsive.
 
-    Answer: {answer}
+Question:
+{question}
 
-    Is the answer relevant to the question? Answer "Yes" or "No" only.
-    """)
+Answer:
+{answer}
+
+Output exactly one token:
+Yes
+or
+No
+""")
+
 def get_documents_req_prompt() -> ChatPromptTemplate:
     """Get the document requirement prompt template"""
     return ChatPromptTemplate.from_template("""
-    You are a helpful assistant. Determine which document(s) of the three  are required to answer the question.
-                                            
-    Output format: {format_instructions}
-    Question: {question}
+You are a financial statement router.
 
-    List the documents required from the following options: ["balance_sheet", "income_statement", "cash_flow"] only in a json format (curly brackets always) nothing else.
-    """)
+Given a question, select which statement categories are required.
+Allowed categories only:
+- "balance_sheet"
+- "income_statement"
+- "cash_flow"
+
+Selection guidance:
+- balance_sheet: assets, liabilities, equity, debt, cash balance, working capital, solvency.
+- income_statement: revenue, expenses, margins, EBITDA, earnings, profit.
+- cash_flow: operating/investing/financing flows, capex, free cash flow, dividends, borrowings.
+- Include multiple categories if the question spans them.
+- If uncertain, choose the smallest sufficient set.
+
+Question:
+{question}
+
+Output format instructions:
+{format_instructions}
+
+Return valid JSON only and no extra text.
+""")
+
 def get_query_construction_prompt() -> ChatPromptTemplate:
     return ChatPromptTemplate.from_template("""
-You are a query generator for a vector database.
+You are a retrieval query generator for a financial vector database.
 
-Your task is to construct a search query using the given question and required documents.
+Construct one compact keyword query using:
+- user question
+- required document categories
 
 STRICT RULES:
-- Output ONLY the final query
-- Do NOT include explanations
-- Do NOT include prefixes like "Sure", "Here is", "Query =", etc.
-- Do NOT include any extra text, markdown, or formatting
-- Output must be a single line
-- Do NOT wrap the output in quotes
-- Do NOT use natural language sentences
-- Use only keywords with spaces in between each suitable for vector search
-  balance_sheets are assets and liabilities, income_statements are profit and loss tables that have income expenses and taxes, cash_flow describes the cash inflows and outflows from operating, investing and financing activities.
- use the above mentioned keywords to construct the query based on the question and required documents and combinations if required but no symbols.                                          
+- Output one line only.
+- Output query text only (no labels, no explanation, no quotes).
+- Use short noun phrases and financial terms.
+- Include synonyms/near terms to improve retrieval recall.
+- Include category-specific terms based on required documents.
+- Avoid conversational wording and punctuation-heavy text.
+
+Category hint terms:
+- balance_sheet -> assets liabilities equity current assets current liabilities debt cash receivables inventory
+- income_statement -> revenue sales cogs gross profit operating expenses ebit ebitda net income margin tax
+- cash_flow -> operating cash flow investing cash flow financing cash flow capex free cash flow dividends borrowings
 
 Question: {question}
 
-Required Documents categories: {documents_required}
+Required document categories: {documents_required}
 
-Return only the query.
+Return the final query only.
 """)
 
 

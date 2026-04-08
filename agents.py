@@ -16,6 +16,24 @@ class GraphState(TypedDict):
     relevancy: str
     relevancy_check_count: int
 
+ALLOWED_DOCS = {"balance_sheet", "income_statement", "cash_flow"}
+
+
+def _normalize_documents_required(result: Any) -> list:
+    """Normalize parser output into a clean list of allowed categories."""
+    if isinstance(result, dict):
+        docs = result.get("documents_required", [])
+    elif isinstance(result, list):
+        docs = result
+    else:
+        docs = []
+
+    if isinstance(docs, str):
+        docs = [docs]
+
+    normalized = [d for d in docs if isinstance(d, str) and d in ALLOWED_DOCS]
+    return normalized or ["income_statement", "balance_sheet", "cash_flow"]
+
 
 def doc_required(state: GraphState) -> dict:
     """Determine which documents are required"""
@@ -33,8 +51,8 @@ def doc_required(state: GraphState) -> dict:
 
     chain = prompt | llm | output_parser
     result = chain.invoke({"question": state["question"], "format_instructions": format_instructions})
-
-    return {"documents_required": result}
+    docs_required = _normalize_documents_required(result)
+    return {"documents_required": docs_required}
 
 def query_construction(state: GraphState) -> dict:
     """Construct query for vectorstore retrieval"""

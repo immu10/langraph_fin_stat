@@ -4,3 +4,4 @@ chroma_db/
 content.txt
 __pycache__/
 *.pyc
+.vscode/

@@ -103,9 +103,6 @@ SECTION_KEYWORDS = {
     "cash_flow": [
         "cash flow statement",
         "statement of cash flows"
-    ],
-    "equity": [
-        "statement of changes in equity"
     ]
 }
 
@@ -119,6 +116,23 @@ STOP_KEYWORDS = [
     "board of directors",
     "auditors report"
 ]
+
+GENERIC_SECTION_BOUNDARY_PATTERNS = [
+    r"\bnotes?\s+to\b",
+    r"\bauditors?\b",
+    r"\bdirectors?\s+report\b",
+    r"\bmanagement\s+discussion\b",
+    r"\bstatement\s+of\b",
+    r"\breport\s+of\b"
+]
+
+
+def is_generic_section_boundary(text):
+    # Use the first lines because headings usually appear at the top.
+    top_text = "\n".join(text.splitlines()[:8]).strip()
+    if not top_text:
+        return False
+    return any(re.search(pattern, top_text) for pattern in GENERIC_SECTION_BOUNDARY_PATTERNS)
 
 
 # -------------------------------
@@ -155,6 +169,11 @@ def assign_section_ranges(detected_sections, pages):
     detected_sections = sorted(detected_sections, key=lambda x: x["start_page"])
 
     results = []
+    section_keywords_flat = {
+        keyword
+        for keywords in SECTION_KEYWORDS.values()
+        for keyword in keywords
+    }
 
     for i, sec in enumerate(detected_sections):
         start = sec["start_page"]
@@ -166,9 +185,22 @@ def assign_section_ranges(detected_sections, pages):
             end = len(pages)
 
         for j in range(start + 1, end):
-            if any(k in pages[j]["text"] for k in STOP_KEYWORDS):
+            page_text = pages[j]["text"]
+
+            # Hard boundaries
+            if any(k in page_text for k in STOP_KEYWORDS):
                 end = j
                 break
+            if any(k in page_text for k in section_keywords_flat):
+                end = j
+                break
+            if is_generic_section_boundary(page_text):
+                end = j
+                break
+
+        # Guarantee a non-empty slice for extraction.
+        if end <= start:
+            end = min(start + 1, len(pages))
 
         results.append({
             "section": sec["section"],

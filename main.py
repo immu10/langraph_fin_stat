@@ -5,7 +5,6 @@ from langchain_community.vectorstores import Chroma
 import subprocess
 import sys
 import os
-import json
 
 def build_rag_graph():
     """Build the RAG graph"""
