@@ -5,6 +5,7 @@ from langchain_community.vectorstores import Chroma
 import subprocess
 import sys
 import os
+import warnings
 
 def build_rag_graph():
     """Build the RAG graph"""
@@ -67,6 +68,7 @@ vector_store = Chroma(persist_directory="./chroma_db")
 rag_graph = build_rag_graph()
 
 if __name__ == "__main__":
+    warnings.filterwarnings('ignore')
     # rag_flow("what make up the expenses of the company?")
     ui_path = os.path.join(os.path.dirname(__file__), "ui.py")
     subprocess.run([sys.executable, "-m", "streamlit", "run", ui_path], check=True)

@@ -76,6 +76,9 @@ def get_query_construction_prompt() -> ChatPromptTemplate:
     return ChatPromptTemplate.from_template("""
 You are a retrieval query generator for a financial vector database.
 
+Use the following high-level summary to understand the selected sections:
+{summary}
+
 Construct one compact keyword query using:
 - user question
 - required document categories
@@ -88,10 +91,21 @@ STRICT RULES:
 - Include category-specific terms based on required documents.
 - Avoid conversational wording and punctuation-heavy text.
 
-Category hint terms:
+Category terms:
 - balance_sheet -> assets liabilities equity current assets current liabilities debt cash receivables inventory
 - income_statement -> revenue sales cogs gross profit operating expenses ebit ebitda net income margin tax
 - cash_flow -> operating cash flow investing cash flow financing cash flow capex free cash flow dividends borrowings
+
+Section summaries (use as semantic context):
+- balance_sheet -> point-in-time financial position; assets, liabilities, equity, leverage, liquidity, working capital.
+- income_statement -> period performance; revenue, costs, expenses, operating profit, net income, margins.
+- cash_flow -> period cash movement; operating/investing/financing flows, capex, funding, free cash flow.
+
+Topic to document guidance:
+- Position/solvency/liquidity/capital structure topics -> balance_sheet.
+- Profitability/earnings/margin/cost structure topics -> income_statement.
+- Cash generation/cash usage/capex/funding topics -> cash_flow.
+- Profit versus cash quality topics -> include income_statement + cash_flow.
 
 Question: {question}
 
