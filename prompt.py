@@ -77,7 +77,7 @@ def get_query_construction_prompt() -> ChatPromptTemplate:
 You are a retrieval query generator for a financial vector database.
 
 Use the following high-level summary to understand the selected sections:
-{summary}
+{summaries}
 
 Construct one compact keyword query using:
 - user question
@@ -111,7 +111,7 @@ Question: {question}
 
 Required document categories: {documents_required}
                                             
-section summaries: {summaries}
+
 
 Return the final query only.
 """)

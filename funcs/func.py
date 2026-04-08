@@ -3,8 +3,9 @@ from typing import List
 from langchain_community.document_loaders import DirectoryLoader, TextLoader, PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from config import embeddings,llm
-from funcs.func2 import vector_store_init
+# from config import embeddings,llm
+from func2 import vector_store_init
+from langchain_community.llms import Ollama
 
 
 
@@ -70,3 +71,13 @@ Summary:"""
             summaries[key] = f"Error generating summary: {str(e)}"
     
     return summaries
+
+if __name__ == "__main__":
+    # Example usage
+    llm = Ollama(
+    model="llama2:13b",
+    base_url="http://localhost:11434",
+    temperature=0.0
+    )
+    uploaded_file = r"financial_statements.pdf"
+    summaries = split_summary(uploaded_file)

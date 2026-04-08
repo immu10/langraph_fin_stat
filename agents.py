@@ -81,10 +81,13 @@ def retrieve_documents_for_question(state: GraphState) -> Dict[str, Any]:
     docs = vectorstore.similarity_search(state["query"], k=5)
     context = "\n\n".join([doc for doc in docs])
     print(f"Retrieved {len(docs)} documents written in context.txt")
-    
+    print(f"Context:\n{context[:500]}...")  # Print first 500 characters of context
+    print(type(context))
+    print(context)
+
     # Save context to file for debugging
-    with open("context.txt", "w") as f:
-        f.write(context)
+    # with open("context.txt", "w") as f:
+    #     f.write(context)
 
     return {"context": context}
 
@@ -123,11 +126,7 @@ if __name__ == "__main__":
     from langchain_community.vectorstores import Chroma
     vector_store = Chroma(persist_directory="./chroma_db") 
     query = "profit"
-    docs = vector_store.get()
-
-    for i, text in enumerate(docs["documents"]):
-        print(f"\n--- Document {i+1} ---")
-        print(text)
-    print(f"Retrieved {len(docs)} documents:")
-    print("IDs:", docs["ids"])
-    print("Number of documents:", len(docs["ids"]))
+    docs = vector_store.similarity_search( query, k=5)
+    print([doc for doc in docs])
+    # with open("context.txt", "w") as f:
+    #     f.write("\n\n".join(docs))
