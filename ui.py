@@ -379,20 +379,7 @@ h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
     box-shadow: 0 6px 32px rgba(245,200,66,0.55) !important;
 }
 
-.chat-panel-wrap {
-    position: fixed;
-    right: 32px;
-    bottom: 100px;
-    width: 380px;
-    max-height: 520px;
-    overflow-y: auto;
-    background: #111116;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-    z-index: 999;
-    padding: 14px;
-}
+
 </style>
 """, unsafe_allow_html=True)
 

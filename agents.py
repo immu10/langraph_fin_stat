@@ -81,7 +81,7 @@ def retrieve_documents_for_question(state: GraphState) -> Dict[str, Any]:
     
     # Save context to file for debugging
     with open("context.txt", "w") as f:
-        f.write(context)
+        f.write(docs)
 
     return {"context": context}
 
