@@ -15,6 +15,7 @@ class GraphState(TypedDict):
     answer: str
     relevancy: str
     relevancy_check_count: int
+    summary: Any
 
 ALLOWED_DOCS = {"balance_sheet", "income_statement", "cash_flow"}
 
@@ -76,12 +77,12 @@ def retrieve_documents_for_question(state: GraphState) -> Dict[str, Any]:
     
     print("Performing similarity search...")
     docs = vectorstore.similarity_search(state["query"], k=5)
-    context = "\n\n".join([doc.page_content for doc in docs])
+    context = "\n\n".join([doc for doc in docs["documents"]])
     print(f"Retrieved {len(docs)} documents written in context.txt")
     
     # Save context to file for debugging
     with open("context.txt", "w") as f:
-        f.write(docs)
+        f.write(context)
 
     return {"context": context}
 
