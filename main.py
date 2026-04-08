@@ -33,7 +33,7 @@ def build_rag_graph():
 
     return workflow.compile()
 
-def rag_flow(question):
+def rag_flow(question,summaries):
     """Main function to run the RAG system"""
     print("LangGraph RAG System")
     print("===================")
@@ -58,6 +58,7 @@ def rag_flow(question):
     result = rag_graph.invoke({
         "vector_store": vector_store,
         "question": question,
+        "summaries": summaries,
         "relevancy_check_count": 0  # initialize here
     })
     print(f"\nAnswer: {result['answer']}")

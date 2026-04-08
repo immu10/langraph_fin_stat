@@ -15,7 +15,7 @@ class GraphState(TypedDict):
     answer: str
     relevancy: str
     relevancy_check_count: int
-    summary: Any
+    summaries: Any
 
 ALLOWED_DOCS = {"balance_sheet", "income_statement", "cash_flow"}
 
@@ -61,7 +61,9 @@ def query_construction(state: GraphState) -> dict:
     # In a real implementation, you might want to do some processing here
     prompt = get_query_construction_prompt()
     chain = prompt | llm | StrOutputParser()
-    query = chain.invoke({"question": state["question"], "documents_required": state["documents_required"]})
+    query = chain.invoke({"question": state["question"], 
+                          "documents_required": state["documents_required"], 
+                          "summaries": state["summaries"]})
     print(f"Constructed query: {query}")
     return {"query": query}  
 
@@ -77,7 +79,7 @@ def retrieve_documents_for_question(state: GraphState) -> Dict[str, Any]:
     
     print("Performing similarity search...")
     docs = vectorstore.similarity_search(state["query"], k=5)
-    context = "\n\n".join([doc for doc in docs["documents"]])
+    context = "\n\n".join([doc for doc in docs])
     print(f"Retrieved {len(docs)} documents written in context.txt")
     
     # Save context to file for debugging

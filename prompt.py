@@ -108,6 +108,8 @@ Topic to document guidance:
 Question: {question}
 
 Required document categories: {documents_required}
+                                            
+section summaries: {summaries}
 
 Return the final query only.
 """)
