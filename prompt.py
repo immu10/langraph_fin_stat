@@ -76,8 +76,6 @@ def get_query_construction_prompt() -> ChatPromptTemplate:
     return ChatPromptTemplate.from_template("""
 You are a retrieval query generator for a financial vector database.
 
-Use the following high-level summary to understand the selected sections:
-{summaries}
 
 Construct one compact keyword query using:
 - user question
