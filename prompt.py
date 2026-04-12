@@ -115,41 +115,41 @@ Return the final query only.
 """)
 
 
-if __name__ == "__main__":
-    from langchain_community.llms import Ollama
-    # Initialize LLM
-    llm = Ollama(
-        model="llama2:13b",
-        base_url="http://localhost:11434",
-        temperature=0.0
-    )
+# if __name__ == "__main__":
+#     from langchain_community.llms import Ollama
+#     # Initialize LLM
+#     llm = Ollama(
+#         model="llama2:13b",
+#         base_url="http://localhost:11434",
+#         temperature=0.0
+#     )
 
-    # Sample inputs
-    question = "What is the company's net income?"
-    context = "The income statement shows a net income of $5 million."
-    answer = "The company's net income is $5 million."
+#     # Sample inputs
+#     question = "What is the company's net income?"
+#     context = "The income statement shows a net income of $5 million."
+#     answer = "The company's net income is $5 million."
 
-    # ------------------ RAG ------------------
-    rag_chain = get_rag_prompt() | llm
-    print("=== RAG OUTPUT ===")
-    print(rag_chain.invoke({
-        "context": context,
-        "question": question
-    }))
-    print("\n")
+#     # ------------------ RAG ------------------
+#     rag_chain = get_rag_prompt() | llm
+#     print("=== RAG OUTPUT ===")
+#     print(rag_chain.invoke({
+#         "context": context,
+#         "question": question
+#     }))
+#     print("\n")
 
-    # ------------------ RELEVANCY ------------------
-    relevancy_chain = get_relevency_prompt() | llm
-    print("=== RELEVANCY OUTPUT ===")
-    print(relevancy_chain.invoke({
-        "question": question,
-        "answer": answer
-    }))
-    print("\n")
+#     # ------------------ RELEVANCY ------------------
+#     relevancy_chain = get_relevency_prompt() | llm
+#     print("=== RELEVANCY OUTPUT ===")
+#     print(relevancy_chain.invoke({
+#         "question": question,
+#         "answer": answer
+#     }))
+#     print("\n")
 
-    # ------------------ DOCUMENTS REQUIRED ------------------
-    doc_chain = get_documents_req_prompt() | llm
-    print("=== DOCUMENTS REQUIRED OUTPUT ===")
-    print(doc_chain.invoke({
-        "question": question
-    }))
+#     # ------------------ DOCUMENTS REQUIRED ------------------
+#     doc_chain = get_documents_req_prompt() | llm
+#     print("=== DOCUMENTS REQUIRED OUTPUT ===")
+#     print(doc_chain.invoke({
+#         "question": question
+#     }))

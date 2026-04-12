@@ -1,7 +1,7 @@
 from langgraph.graph import START, StateGraph, END
 from config import embeddings
 from agents import GraphState, answer_relevancy_check, doc_required, query_construction, retrieve_documents_for_question, generate_answer, should_retry
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 import subprocess
 import sys
 import os

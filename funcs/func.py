@@ -1,10 +1,10 @@
 import os
 from typing import List
 from langchain_community.document_loaders import DirectoryLoader, TextLoader, PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters.character import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-# from config import embeddings,llm
-from func2 import vector_store_init
+from config import embeddings,llm
+from funcs.func2 import vector_store_init
 from langchain_community.llms import Ollama
 
 

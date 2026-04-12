@@ -1,6 +1,7 @@
 from typing import Dict, Any
 from langchain_core.output_parsers import StrOutputParser
-from langchain.output_parsers import StructuredOutputParser, ResponseSchema
+# from langchain_core.output_parsers import StructuredOutputParser
+from langchain_classic.output_parsers.structured import StructuredOutputParser, ResponseSchema
 from langchain_core.prompts import ChatPromptTemplate
 from typing_extensions import TypedDict
 from config import llm
@@ -79,9 +80,9 @@ def retrieve_documents_for_question(state: GraphState) -> Dict[str, Any]:
     
     print("Performing similarity search...")
     docs = vectorstore.similarity_search(state["query"], k=5)
-    context = "\n\n".join([doc for doc in docs])
+    context = "\n\n".join([doc.page_content for doc in docs])
     print(f"Retrieved {len(docs)} documents written in context.txt")
-    print(f"Context:\n{context[:500]}...")  # Print first 500 characters of context
+    # print(f"Context:\n{context[:500]}...")  # Print first 500 characters of context
     print(type(context))
     print(context)
 

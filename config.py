@@ -1,6 +1,6 @@
 import os
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.llms import Ollama
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import OllamaLLM
 
 # Set local cache directory for sentence transformers
 os.environ["SENTENCE_TRANSFORMERS_HOME"] = "./models"
@@ -12,7 +12,7 @@ embeddings = HuggingFaceEmbeddings(
 )
 print("Embedding model loaded successfully!")
 
-llm = Ollama(
+llm = OllamaLLM(
     model="llama2:13b",
     base_url="http://localhost:11434",
     temperature=0.0
